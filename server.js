@@ -29,7 +29,7 @@ app.use((req, res, next) => {
     if (req.session.signatureId) {
         req.url != '/petition' ? next() : res.redirect('/thanks');
     } else {
-        req.url == '/petition' ? next() : res.redirect('/petition'); // can i get rid of this conditional and just redirect?????????????????
+        req.url == '/petition' ? next() : res.redirect('/petition');
     }
 });
 
@@ -61,13 +61,12 @@ app.post('/petition', (req, res) => {
         })
         .catch((err) => {
             console.log('err >> ', err);
-            res.render('petition', { layout: 'main' }); //??????? HOW TO PASS AN ERR MSG ??????
+            res.render('petition', { layout: 'main', error: true }); // can be both in templates and here / should  it in the handlebars / can be put into partials
         });
 });
 
 //  GET request to "/thanks"
 app.get('/thanks', (req, res) => {
-    // haven't I checked the condition in my middleware before requests?????????????????????????????????????????????????
     res.render('thanks', { layout: 'main' });
 });
 
