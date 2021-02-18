@@ -1,0 +1,24 @@
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.name {
+    display: flex;
+    justify-content: center;
+}
+.name > * {
+    margin: 2vw;
+}
+.labels {
+    font-weight: bolder;
+    font-size: larger;
+    font-style: italic;
+}
+canvas {
+    border: solid 1px black;
+}
+.canvas-submit {
+    display: flex;
+    flex-direction: column;
+}

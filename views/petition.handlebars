@@ -5,18 +5,25 @@
 <main>
     <div class="main-container">
         <div class="form">
-            <form method="post">
-                <input type="text" id="firstname" name="firstname"><br>
-                <label for="firstname">First Name</label>
-                <input type="text" id="lastname" name="lastname"><br>
-                <label for="lastname">Last Name</label>
-                <input type="hidden" name="sig_id">
-                <canvas></canvas>
-                <button>SUBMIT</button>
+            <form method="POST">
+                <div class="name inputs">
+                    <input type="text" id="firstname" name="firstname"><br>
+                    <input type="text" id="lastname" name="lastname"><br>
+                </div>
+                <div class="name labels">
+                    <label for="firstname">First Name</label>
+                    <label for="lastname">Last Name</label>
+                </div>
+                <div class="canvas-submit">
+                    <input type="hidden" name="signature">
+                    <canvas id="canvas" width="400" height="100"></canvas>
+                    <button>SUBMIT</button>
+                </div>
             </form>
         </div>
     </div>
     <div class="main-content">
 
     </div>
+    <script src="script.js"></script> {{!-- is this the right place??????????????????????????? --}}
 </main>
