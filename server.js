@@ -25,13 +25,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static('./public'));
 
 //  user check with cookie
-app.use((req, res, next) => {
-    if (req.session.signatureId) {
-        req.url != '/petition' ? next() : res.redirect('/thanks');
-    } else {
-        req.url == '/petition' ? next() : res.redirect('/petition');
-    }
-});
+// app.use((req, res, next) => {
+//     if (req.session.signatureId) {
+//         req.url != '/petition' ? next() : res.redirect('/thanks');
+//     } else {
+//         req.url == '/petition' ? next() : res.redirect('/petition');
+//     }
+// });
 
 // ==================== REQUESTS ========================
 //  GET request to "/"
@@ -46,10 +46,9 @@ app.get('/petition', (req, res) => {
 
 //  POST request to "/petition"
 app.post('/petition', (req, res) => {
+    // storing data in db redirecting to thanks page but having an error on bash!!(violate check constraint)
     // user entered info from the form
-    const firstname = req.body.firstname;
-    const lastname = req.body.lastname;
-    const signature = req.body.signature;
+    const { firstname, lastname, signature } = req.body;
 
     // adding user infos to petition database
     db.addSigner(firstname, lastname, signature)
@@ -61,19 +60,31 @@ app.post('/petition', (req, res) => {
         })
         .catch((err) => {
             console.log('err >> ', err);
-            res.render('petition', { layout: 'main', error: true }); // can be both in templates and here / should  it in the handlebars / can be put into partials
+            res.render('petition', {
+                layout: 'main',
+                error: true,
+                errorMsg: `Error in saving your data, try again!`,
+            }); // can be both in templates and here / should  it in the handlebars / can be put into partials
         });
 });
 
 //  GET request to "/thanks"
 app.get('/thanks', (req, res) => {
-    res.render('thanks', { layout: 'main' });
+    db.totalSigners().then(({ rows }) => {
+        let signerCount = rows[0].count;
+        =================================
+        add signature img !!
+        // console.log('signerCount :>> ', signerCount);
+        res.render('thanks', { layout: 'main', signerCount });
+    });
 });
 
 //  GET request to "/signers"
 app.get('/signers', (req, res) => {
+    //ERROR: cannot set headers / not rendering
     db.signerName()
         .then(({ rows }) => {
+            // console.log('rows :>> ', rows);
             res.render('signers', { layout: 'main', rows });
         })
         .catch((err) => console.log('err :>> ', err));

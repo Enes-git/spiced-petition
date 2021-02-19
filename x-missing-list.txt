@@ -1,0 +1,9 @@
+1.st Day:
+- /signers page not rendering
+- an error message to the petition.hb must be added
+
+2.nd Day:
+-alter GET/thanks to place the signature img
+
+3.rd Day:
+everything!
