@@ -4,8 +4,10 @@
     <h4>{{errorMsg}}</h4>
     {{/if}}
     <div>
-        <input type="text" id="email" name="email"><br>
-        <input type="text" id="password" name="password"><br>
+        <input type="email" id="email" name="email" required>
+        <label for="email">Email Address</label>
+        <input type="password" id="password" name="password" required>
+        <label for="password">Password</label>
     </div>
     <button>LOGIN</button>
     <p>If you are not a member of this incredibly reactive community please <a href="/register">register here</a>.</p>

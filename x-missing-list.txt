@@ -1,10 +1,6 @@
 2.nd Day:
 -add csrf at the end of the project
 
-3.rd Day:
-- conditional check for register/login get and post req
-- server.js signed user check in login and needed query for this in db.js
-
 4.th Day:
 everything!
 

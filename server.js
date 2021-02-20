@@ -27,10 +27,23 @@ app.use(express.static('./public'));
 
 //  user check with cookie
 app.use((req, res, next) => {
-    if (req.session.signatureId) {
-        req.url != '/signers' ? res.redirect('/thanks') : next();
+    if (req.session.userId) {
+        req.url != '/register'
+            ? res.redirect('/login', { layout: main })
+            : next();
     } else {
-        req.url == '/petition' ? next() : res.redirect('/petition');
+        res.redirect('/register', { layout: 'main' });
+    }
+});
+
+// signature check with cookie
+app.use((req, res, next) => {
+    if (req.session.signatureId) {
+        req.url != '/signers'
+            ? res.redirect('/thanks', { layout: 'main' })
+            : next();
+    } else {
+        res.redirect('/petition', { layout: 'main' });
     }
 });
 
@@ -139,14 +152,22 @@ app.post('/register', (req, res) => {
 // route "login"
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
+    if (email == '' || password == '') {
+        res.render('login', {
+            layout: 'main',
+            error: true,
+            errorMsg: `Did you think I would buy that?! Please give me that email and password to enter.`,
+        });
+    }
     db.getLogInfo(email)
         .then(({ rows }) => {
             let password_hash = rows[0];
             return compare(password, password_hash).then((match) => {
                 if (match) {
-                    if ('user has already signed') {
+                    req.session.userId = id;
+                    if (req.session.signatureId) {
                         req.url == '/signers'
-                            ? res.redirect('/signers', { layout: 'main' }) // can use next() here?
+                            ? res.redirect('/signers', { layout: 'main' }) // can use next() or continue here?
                             : res.redirect('/thanks', { layout: 'main' });
                     } else {
                         res.redirect('/petition', { layout: 'main' });
@@ -155,7 +176,7 @@ app.post('/login', (req, res) => {
                     res.render('login', {
                         layout: 'main',
                         error: true,
-                        errorMsg: `Your information is not true, please try again with caution!`,
+                        errorMsg: `Your password is wrong, please try again with paying attention to your fingers!`,
                     });
                 }
             });

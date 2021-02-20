@@ -55,7 +55,7 @@ module.exports.getSignature = (id) => {
 module.exports.getLogInfo = (email) => {
     // should i add email here, since i have it as a param from user alredy
     const q = `
-    SELECT password_hash, email
+    SELECT password_hash
     FROM users 
     WHERE email=$1`;
     const params = [email];

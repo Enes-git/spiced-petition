@@ -1,9 +1,13 @@
 - db.js: 
     - Should i check signature when getting the signer name, if it is empty or not?
     - Will the list be an ordered list or should it be shown in order?
-    - can i have one query where i get all user info and then use it multiple times in server.js depending the info i need?
+    - is it logical to have one query where i get all user info and then use it multiple times in server.js depending the info i need?
     - getLogInfo: does it have to retrieve email as well. we already have it from the user and can use it maybe?
 - server.js:
     - is my password check in POST/register logical?
-    - can i use next() in a request?
-    -is an err mesg and re-rendering necessary if there is an err while hashing? 
+    - can i use next() or continue in a request?
+    - is an err mesg and re-rendering necessary if there is an err while hashing? 
+    - are two conditionals in my custom middleware ok?
+    - i set the email and password as required so do i need a check in server.js?
+    - session ile cookie set ederken eşitlediğimiz id ne oluyor, nereden geliyor?
+    - is signed check after login correct?
