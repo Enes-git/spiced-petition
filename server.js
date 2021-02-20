@@ -1,3 +1,4 @@
+const { hash, compare } = require('./utils/bc.js');
 const db = require('./db');
 const hb = require('express-handlebars');
 const cookieSession = require('cookie-session');
@@ -25,33 +26,156 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static('./public'));
 
 //  user check with cookie
-// app.use((req, res, next) => {
-//     if (req.session.signatureId) {
-//         req.url != '/petition' ? next() : res.redirect('/thanks');
-//     } else {
-//         req.url == '/petition' ? next() : res.redirect('/petition');
-//     }
-// });
-
-// ==================== REQUESTS ========================
-//  GET request to "/"
-app.get('/', (req, res) => {
-    res.redirect('/petition');
+app.use((req, res, next) => {
+    if (req.session.signatureId) {
+        req.url != '/signers' ? res.redirect('/thanks') : next();
+    } else {
+        req.url == '/petition' ? next() : res.redirect('/petition');
+    }
 });
 
-//  GET request to "/petition"
+// ==================== REQUESTS ========================
+
+// ==== GET REQUESTS =====
+// route "/register"
+app.get('/register', (req, res) => {
+    res.render('register', { layout: 'main' });
+});
+
+// route "/login"
+app.get('/login', (req, res) => {
+    res.render('login', { layout: 'main' });
+});
+
+// route "/"
+app.get('/', (req, res) => {
+    res.redirect('/petition'); // can be changed to a landing page
+});
+
+//  route "/petition"
 app.get('/petition', (req, res) => {
     res.render('petition', { layout: 'main' });
 });
 
-//  POST request to "/petition"
-app.post('/petition', (req, res) => {
-    // storing data in db redirecting to thanks page but having an error on bash!!(violate check constraint)
-    // user entered info from the form
-    const { firstname, lastname, signature } = req.body;
+//  route "/thanks"
+app.get('/thanks', (req, res) => {
+    db.totalSigners()
+        .then(({ rows }) => {
+            let signerCount = rows[0].count;
+            // console.log('signerCount :>> ', signerCount);
+            db.getSignature(req.session.signatureId)
+                .then(({ rows }) => {
+                    let canvasUrlVal = rows[0].signature;
+                    res.render('thanks', {
+                        layout: 'main',
+                        signerCount,
+                        canvasUrlVal,
+                    });
+                })
+                .catch((err) => console.log('err :>> ', err));
+        })
+        .catch((err) => console.log('err :>> ', err));
+});
 
+// route "/signers"
+app.get('/signers', (req, res) => {
+    //ERROR: cannot set headers / not rendering
+    db.signerName()
+        .then(({ rows }) => {
+            // console.log('rows :>> ', rows);
+            res.render('signers', { layout: 'main', rows });
+        })
+        .catch((err) => console.log('err :>> ', err));
+});
+// =============== END GET requests ===========================
+
+// =============== POST REQUESTS =========================
+// route "register"
+app.post('/register', (req, res) => {
+    const { firstname, lastname, email, password, rePassword } = req.body;
+    if (!firstname || !lastname || !email || !password || !rePassword) {
+        res.render('register', {
+            layout: 'main',
+            error: true,
+            errorMsg: `Please provide all the information. We really want to track you!`,
+        });
+    } else {
+        if (password === rePassword) {
+            hash(password)
+                .then((password_hash) => {
+                    return db
+                        .addNewUser(firstname, lastname, email, password_hash)
+                        .then(({ rows }) => {
+                            req.session.userId = rows[0].id; // firs&lastname may come in handy!
+                            res.redirect('/petition');
+                        })
+                        .catch((err) => {
+                            console.log('err :>> ', err);
+                            res.render('register', {
+                                layout: 'main',
+                                error: true,
+                                errorMsg: `Wait, I wasn't listening. Please type your information again!`,
+                            });
+                        });
+                })
+                .catch((err) => {
+                    console.log('err :>> ', err);
+                    res.render('register', {
+                        layout: 'main',
+                        error: true,
+                        errorMsg: `This may sound silly but I couldn't handle your password. Will you be a good person and give it again? Please...?`,
+                    });
+                });
+        } else {
+            res.render('register', {
+                layout: 'main',
+                error: true,
+                errorMsg: `Your password does NOT match. Please try again carefully. Just focus on your typing!`,
+            });
+        }
+    }
+});
+
+// route "login"
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
+    db.getLogInfo(email)
+        .then(({ rows }) => {
+            let password_hash = rows[0];
+            return compare(password, password_hash).then((match) => {
+                if (match) {
+                    if ('user has already signed') {
+                        req.url == '/signers'
+                            ? res.redirect('/signers', { layout: 'main' }) // can use next() here?
+                            : res.redirect('/thanks', { layout: 'main' });
+                    } else {
+                        res.redirect('/petition', { layout: 'main' });
+                    }
+                } else {
+                    res.render('login', {
+                        layout: 'main',
+                        error: true,
+                        errorMsg: `Your information is not true, please try again with caution!`,
+                    });
+                }
+            });
+        })
+        .catch((err) => {
+            console.log('err :>> ', err);
+            res.render('login', {
+                layout: 'main',
+                error: true,
+                errorMsg: `Either you are trying to trick us with an unregistered email or the nasty database didn't gave us your information.  Either way please try again.`,
+            });
+        });
+});
+
+//  route "/petition"
+app.post('/petition', (req, res) => {
+    // user entered info from the form
+    const { signature } = req.body;
     // adding user infos to petition database
-    db.addSigner(firstname, lastname, signature)
+    db.addSignature(req.session.userId, signature)
         .then(({ rows }) => {
             // console.log('rows :>> ', rows);
             // redirecting to thanks page and setting cookie
@@ -66,29 +190,6 @@ app.post('/petition', (req, res) => {
                 errorMsg: `Error in saving your data, try again!`,
             }); // can be both in templates and here / should  it in the handlebars / can be put into partials
         });
-});
-
-//  GET request to "/thanks"
-app.get('/thanks', (req, res) => {
-    db.totalSigners().then(({ rows }) => {
-        let signerCount = rows[0].count;
-        =================================
-        add signature img !!
-        // console.log('signerCount :>> ', signerCount);
-        res.render('thanks', { layout: 'main', signerCount });
-    });
-});
-
-//  GET request to "/signers"
-app.get('/signers', (req, res) => {
-    //ERROR: cannot set headers / not rendering
-    db.signerName()
-        .then(({ rows }) => {
-            // console.log('rows :>> ', rows);
-            res.render('signers', { layout: 'main', rows });
-        })
-        .catch((err) => console.log('err :>> ', err));
-    res.redirect('/petition');
 });
 
 app.listen(8080, () => console.log("I'm all ears!"));

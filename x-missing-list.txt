@@ -1,9 +1,19 @@
-1.st Day:
-- /signers page not rendering
-- an error message to the petition.hb must be added
-
 2.nd Day:
--alter GET/thanks to place the signature img
+-add csrf at the end of the project
 
 3.rd Day:
+- conditional check for register/login get and post req
+- server.js signed user check in login and needed query for this in db.js
+
+4.th Day:
 everything!
+
+
+
+
+
+
+BONUS
+- GET/ can render a landing page
+- store name infos into the cookie to use it later
+- ahving diffrent layout for registered users

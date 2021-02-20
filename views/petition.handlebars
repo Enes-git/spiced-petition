@@ -6,14 +6,9 @@
     <div class="main-container">
         <div class="form">
             <form method="POST">
-                <div class="name inputs">
-                    <input type="text" id="firstname" name="firstname"><br>
-                    <input type="text" id="lastname" name="lastname"><br>
-                </div>
-                <div class="name labels">
-                    <label for="firstname">First Name</label>
-                    <label for="lastname">Last Name</label>
-                </div>
+                {{#if error}}
+                <h4>{{errorMsg}}</h4>
+                {{/if}}
                 <div class="canvas-submit">
                     <input id="canvas-url" type="hidden" name="signature">
                     <canvas id="canvas" width="400" height="100"></canvas>

@@ -1,0 +1,21 @@
+<form method="POST">
+    {{#if error}}
+    <h4>{{errorMsg}}</h4>
+    {{/if}}
+    <div class="name inputs">
+        <input type="text" id="firstname" name="firstname"><br>
+        <input type="text" id="lastname" name="lastname"><br>
+        <input type="text" id="email" name="email"><br>
+        <input type="text" id="password" name="password"><br>
+        <input type="text" id="rePassword" name="rePassword"><br>
+    </div>
+    <div class="name labels">
+        <label for="firstname">First Name</label>
+        <label for="lastname">Last Name</label>
+        <label for="email">Email Address</label>
+        <label for="password">Password</label>
+        <label for="rePassword">Confirm your password</label>
+    </div>    
+    <button>SIGN UP</button>
+    <p>If you are already a member of this incredibly reactive community please <a href="/login">log in</a>.</p>
+</form>
