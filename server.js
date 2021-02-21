@@ -25,31 +25,47 @@ app.use(express.urlencoded({ extended: false }));
 //  serving the static files
 app.use(express.static('./public'));
 
-//  user check with cookie
-app.use((req, res, next) => {
-    if (req.session.userId) {
-        req.url != '/register'
-            ? res.redirect('/login', { layout: main })
-            : next();
-    } else {
-        res.redirect('/register', { layout: 'main' });
-    }
-});
+//  user check with cookie ===== NOT WORKING ======
+// app.use((req, res, next) => {
+//     if (req.session.userId) {
+//         req.url != '/register' ? res.redirect('/login') : next();
+//     } else {
+//         res.redirect('/register');
+//     }
+// });
 
-// signature check with cookie
-app.use((req, res, next) => {
-    if (req.session.signatureId) {
-        req.url != '/signers'
-            ? res.redirect('/thanks', { layout: 'main' })
-            : next();
-    } else {
-        res.redirect('/petition', { layout: 'main' });
-    }
-});
-
+// signature check with cookie ===== NOT WORKING ======
+// app.use((req, res, next) => {
+//     if (req.session.signatureId) {
+//         req.url != '/signers' ? res.redirect('/thanks') : next();
+//     } else {
+//         res.redirect('/petition');
+//     }
+// });
+// app.use((req, res, next) => {
+//     if (req.session.userId) {
+//         if (req.url != "register"){
+//             res.redirect("/login");
+//             next('route');
+//         } else{
+//             next('route');
+//         }
+//     else next()
+// }, (req,res, next)=>{
+//     if (req.session.signatureId){
+//         if (req.url == )
+//         res.redirect("/thanks")
+//     }
+// }
+// );
 // ==================== REQUESTS ========================
 
 // ==== GET REQUESTS =====
+// route "/"
+app.get('/', (req, res) => {
+    res.redirect('/register'); // can be changed to a landing page
+});
+
 // route "/register"
 app.get('/register', (req, res) => {
     res.render('register', { layout: 'main' });
@@ -60,9 +76,9 @@ app.get('/login', (req, res) => {
     res.render('login', { layout: 'main' });
 });
 
-// route "/"
-app.get('/', (req, res) => {
-    res.redirect('/petition'); // can be changed to a landing page
+//  route "/profile"
+app.get('/profile', (req, res) => {
+    res.render('profile', { layout: 'main' });
 });
 
 //  route "/petition"
@@ -72,7 +88,7 @@ app.get('/petition', (req, res) => {
 
 //  route "/thanks"
 app.get('/thanks', (req, res) => {
-    db.totalSigners()
+    db.getSignersCount()
         .then(({ rows }) => {
             let signerCount = rows[0].count;
             // console.log('signerCount :>> ', signerCount);
@@ -93,13 +109,23 @@ app.get('/thanks', (req, res) => {
 // route "/signers"
 app.get('/signers', (req, res) => {
     //ERROR: cannot set headers / not rendering
-    db.signerName()
+    db.getAllSigners()
         .then(({ rows }) => {
             // console.log('rows :>> ', rows);
+            // const { first_name, last_name, age, city, url } = rows;
             res.render('signers', { layout: 'main', rows });
         })
         .catch((err) => console.log('err :>> ', err));
 });
+
+// route "/signers_by_city"
+app.get('/signers_by_city/:city', (req, res) => {
+    const city = req.params.city;
+    db.getLocalSigners(req.params.city).then(({ rows }) => {
+        res.render('signers_by_city', { layout: 'main', rows, city });
+    });
+});
+
 // =============== END GET requests ===========================
 
 // =============== POST REQUESTS =========================
@@ -120,7 +146,7 @@ app.post('/register', (req, res) => {
                         .addNewUser(firstname, lastname, email, password_hash)
                         .then(({ rows }) => {
                             req.session.userId = rows[0].id; // firs&lastname may come in handy!
-                            res.redirect('/petition');
+                            res.redirect('/profile');
                         })
                         .catch((err) => {
                             console.log('err :>> ', err);
@@ -156,30 +182,35 @@ app.post('/login', (req, res) => {
         res.render('login', {
             layout: 'main',
             error: true,
-            errorMsg: `Did you think I would buy that?! Please give me that email and password to enter.`,
+            errorMsg: `Did you think I would buy that?! Please give me that email and password now!`,
         });
     }
     db.getLogInfo(email)
         .then(({ rows }) => {
-            let password_hash = rows[0];
-            return compare(password, password_hash).then((match) => {
-                if (match) {
-                    req.session.userId = id;
-                    if (req.session.signatureId) {
-                        req.url == '/signers'
-                            ? res.redirect('/signers', { layout: 'main' }) // can use next() or continue here?
-                            : res.redirect('/thanks', { layout: 'main' });
+            const { password_hash, id } = rows[0];
+            return compare(password, password_hash)
+                .then((match) => {
+                    if (match) {
+                        req.session.userId = id;
+                        if (req.session.signatureId) {
+                            req.url == '/signers'
+                                ? res.redirect('/signers') // can use next() or continue here?
+                                : res.redirect('/thanks');
+                        } else {
+                            res.redirect('/petition');
+                        }
                     } else {
-                        res.redirect('/petition', { layout: 'main' });
+                        res.render('login', {
+                            layout: 'main',
+                            error: true,
+                            errorMsg: `Your password is wrong, please try again with paying attention to your fingers!`,
+                        });
                     }
-                } else {
-                    res.render('login', {
-                        layout: 'main',
-                        error: true,
-                        errorMsg: `Your password is wrong, please try again with paying attention to your fingers!`,
-                    });
-                }
-            });
+                })
+                .catch((err) => {
+                    console.log('err :>> ', err);
+                    return db.getLogInfo(email);
+                });
         })
         .catch((err) => {
             console.log('err :>> ', err);
@@ -187,6 +218,27 @@ app.post('/login', (req, res) => {
                 layout: 'main',
                 error: true,
                 errorMsg: `Either you are trying to trick us with an unregistered email or the nasty database didn't gave us your information.  Either way please try again.`,
+            });
+        });
+});
+
+// route "/profile"
+app.post('/profile', (req, res) => {
+    const { age, city, url } = req.body;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url += 'https://';
+    }
+    db.addProfile(req.session.userId, age, city, url)
+        .then(() => {
+            req.session.userId = id;
+            res.redirect('/petition');
+        })
+        .catch((err) => {
+            console.log('err :>> ', err);
+            res.render('profile', {
+                layout: 'main',
+                error: true,
+                errorMsg: `A problem occured while saving your data. Please try again.`,
             });
         });
 });
@@ -212,5 +264,6 @@ app.post('/petition', (req, res) => {
             }); // can be both in templates and here / should  it in the handlebars / can be put into partials
         });
 });
+// ============= END  POST requests ==========================
 
 app.listen(8080, () => console.log("I'm all ears!"));

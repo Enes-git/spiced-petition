@@ -1,0 +1,16 @@
+{{#if error}}
+<h4>{{errorMsg}}</h4>
+{{/if}}
+<form method="POST">
+    <div class="additional-inputs">
+        <input type="text" id="age" name="age" placeholder="3"><br>
+        <input type="text" id="city" name="city" placeholder="Sin City"><br>
+        <input type="url" id="url" name="url"><br>
+    </div>
+    <div class="name labels">
+        <label for="age">Your Age</label>
+        <label for="city">City</label>
+        <label for="url">Personal Page</label>
+    </div>    
+    <button>SAVE</button>
+</form>

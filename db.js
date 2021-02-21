@@ -22,9 +22,18 @@ module.exports.addNewUser = (first_name, last_name, email, password_hash) => {
     return db.query(q, params);
 };
 
+module.exports.addProfile = (user_id, age, city, url) => {
+    const q = `
+    INSERT INTO profiles(age, city, url)
+    VALUES ($1, $2, $3, $4)
+    RETURNING id`;
+    const params = [user_id, age, city, url];
+    return db.query(q, params);
+};
+
 // ================= SELECTS ==========================
 // selecting a total number of signers
-module.exports.totalSigners = () => {
+module.exports.getSignersCount = () => {
     const q = `
     SELECT COUNT(*) 
     FROM signatures`;
@@ -32,12 +41,14 @@ module.exports.totalSigners = () => {
 };
 
 // selecting first and last names of every signer
-module.exports.signerName = () => {
+module.exports.getAllSigners = () => {
     const q = `
-    SELECT first_name, last_name 
-    FROM users
-    RIGHT JOIN signatures
-    ON users.id = signatures.user_id`; // should i check signature here, if there is one? Will this be an ordered list?
+    SELECT signatures.user_id, first_name, last_name, age, city, url 
+    FROM signatures
+    LEFT JOIN users
+    ON users.id = signatures.user_id
+    LEFT JOIN profiles
+    ON profiles.user_id = users.id`;
     return db.query(q);
 };
 
@@ -55,9 +66,23 @@ module.exports.getSignature = (id) => {
 module.exports.getLogInfo = (email) => {
     // should i add email here, since i have it as a param from user alredy
     const q = `
-    SELECT password_hash
+    SELECT password_hash, id
     FROM users 
     WHERE email=$1`;
     const params = [email];
+    return db.query(q, params);
+};
+
+// query to get the signers by city
+module.exports.getLocalSigners = (city) => {
+    const q = `
+    SELECT signatures.user_id, first_name, last_name, age, url 
+    FROM signatures
+    LEFT JOIN users
+    ON users.id = signatures.user_id
+    LEFT JOIN profiles
+    ON profiles.user_id = users.id
+    WHERE LOWER(city)=LOWER($1)`;
+    const params = [city];
     return db.query(q, params);
 };

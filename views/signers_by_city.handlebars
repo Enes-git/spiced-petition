@@ -1,4 +1,5 @@
 <div class="main-container">
+    <p>These proud citizens from {{city}}</p>
     {{#rows}}
         {{#if url}}
             <p>
@@ -8,9 +9,6 @@
                 {{#if age}}
                     ({{age}}) 
                 {{/if}}
-                {{#if city}}
-                    from <a href="/signers_by_city">{{city}}</a>
-                {{/if}}
             </p>
         {{else}}
             <p>
@@ -18,11 +16,10 @@
                 {{#if age}}
                     ({{age}}) 
                 {{/if}}
-                {{#if city}}
-                    from <a href="/signers_by_city">{{city}}</a>
-                {{/if}}
             </p>
         {{/if}}
     {{/rows}}
     <p>has stand against this ...</p>
 </div>
+
+<p>If you are already a member of this incredibly reactive community please <a href="/signers">log in</a>.</p>

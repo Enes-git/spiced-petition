@@ -11,3 +11,10 @@
     - i set the email and password as required so do i need a check in server.js?
     - session ile cookie set ederken eşitlediğimiz id ne oluyor, nereden geliyor?
     - is signed check after login correct?
+    -Do i need to set a user cookie in profile page?
+    -if an error occurs during password check should i use a recursion?
+
+    -Custom middlewares NOT working!!!
+
+
+-additional info post not workin!!

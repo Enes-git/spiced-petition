@@ -13,3 +13,4 @@ BONUS
 - GET/ can render a landing page
 - store name infos into the cookie to use it later
 - ahving diffrent layout for registered users
+- a hamburger menu 
