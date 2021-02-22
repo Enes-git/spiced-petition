@@ -228,9 +228,10 @@ app.post('/profile', (req, res) => {
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
         url += 'https://';
     }
+    // req.session.userId = id; // turned out i do not need it otherwise i recieve an error
+    // should i define a user id cookie here? or do i have already one?
     db.addProfile(req.session.userId, age, city, url)
         .then(() => {
-            req.session.userId = id;
             res.redirect('/petition');
         })
         .catch((err) => {

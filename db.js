@@ -1,5 +1,8 @@
 const spicedPg = require('spiced-pg');
-const db = spicedPg('postgres:postgres:postgres@localhost:5432/petition');
+const db = spicedPg(
+    process.env.DATABASE_URL ||
+        'postgres:postgres:postgres@localhost:5432/petition'
+);
 
 // ================= INSERTS =======================
 // inserting the user's signature
@@ -24,12 +27,14 @@ module.exports.addNewUser = (first_name, last_name, email, password_hash) => {
 
 module.exports.addProfile = (user_id, age, city, url) => {
     const q = `
-    INSERT INTO profiles(age, city, url)
+    INSERT INTO profiles (age, city, url, user_id)
     VALUES ($1, $2, $3, $4)
-    RETURNING id`;
-    const params = [user_id, age, city, url];
+    RETURNING user_id`;
+    const params = [age, city, url, user_id];
     return db.query(q, params);
 };
+
+// module.exports.editProfile=()
 
 // ================= SELECTS ==========================
 // selecting a total number of signers
@@ -44,8 +49,8 @@ module.exports.getSignersCount = () => {
 module.exports.getAllSigners = () => {
     const q = `
     SELECT signatures.user_id, first_name, last_name, age, city, url 
-    FROM signatures
-    LEFT JOIN users
+    FROM users
+    LEFT JOIN signatures
     ON users.id = signatures.user_id
     LEFT JOIN profiles
     ON profiles.user_id = users.id`;
@@ -57,7 +62,7 @@ module.exports.getSignature = (id) => {
     const q = `
     SELECT signature 
     FROM signatures 
-    WHERE id=$1`;
+    WHERE id = $1`;
     const params = [id];
     return db.query(q, params);
 };
@@ -66,9 +71,11 @@ module.exports.getSignature = (id) => {
 module.exports.getLogInfo = (email) => {
     // should i add email here, since i have it as a param from user alredy
     const q = `
-    SELECT password_hash, id
+    SELECT password_hash, id, signature
     FROM users 
-    WHERE email=$1`;
+    LEFT JOIN signatures
+    ON users.id = signatures.user_id
+    WHERE email = $1`;
     const params = [email];
     return db.query(q, params);
 };
@@ -76,13 +83,20 @@ module.exports.getLogInfo = (email) => {
 // query to get the signers by city
 module.exports.getLocalSigners = (city) => {
     const q = `
-    SELECT signatures.user_id, first_name, last_name, age, url 
-    FROM signatures
-    LEFT JOIN users
+    SELECT first_name, last_name, age, url 
+    FROM users
+    LEFT JOIN signatures
     ON users.id = signatures.user_id
     LEFT JOIN profiles
     ON profiles.user_id = users.id
-    WHERE LOWER(city)=LOWER($1)`;
+    WHERE LOWER(city) = LOWER($1)`;
     const params = [city];
     return db.query(q, params);
 };
+
+// module.exports.getUpdateInfo = () => {
+//     const q =`
+//     SELECT profiles..user_id, first_name, last_name, email, age, city, url
+//     FROM users
+//     INNER JOIN `
+// }

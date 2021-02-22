@@ -1,3 +1,4 @@
+Q:
 - db.js: 
     - Should i check signature when getting the signer name, if it is empty or not?
     - Will the list be an ordered list or should it be shown in order?
@@ -11,10 +12,9 @@
     - i set the email and password as required so do i need a check in server.js?
     - session ile cookie set ederken eşitlediğimiz id ne oluyor, nereden geliyor?
     - is signed check after login correct?
-    -Do i need to set a user cookie in profile page?
+    -Do i need to set a user cookie in profile page? because i am coming from either login or register where i have been given a cookie.
     -if an error occurs during password check should i use a recursion?
 
+E:
     -Custom middlewares NOT working!!!
-
-
--additional info post not workin!!
+    -additional info POST NOT workin if left empty!!
