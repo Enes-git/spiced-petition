@@ -267,4 +267,4 @@ app.post('/petition', (req, res) => {
 });
 // ============= END  POST requests ==========================
 
-app.listen(8080, () => console.log("I'm all ears!"));
+app.listen(process.env.PORT || 8080, () => console.log("I'm all ears!"));
