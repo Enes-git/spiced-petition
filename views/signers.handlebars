@@ -1,28 +1,32 @@
-<div class="main-container">
-    {{#rows}}
-        {{#if url}}
-            <p>
-                <a href="{{url}}">
-                    {{first_name}} {{last_name}}
-                </a> 
-                {{#if age}}
-                    ({{age}}) 
-                {{/if}}
-                {{#if city}}
-                    from <a href="/signers_by_city">{{city}}</a>
-                {{/if}}
-            </p>
-        {{else}}
-            <p>
-                {{first_name}} {{last_name}} 
-                {{#if age}}
-                    ({{age}}) 
-                {{/if}}
-                {{#if city}}
-                    from <a href="/signers_by_city">{{city}}</a>
-                {{/if}}
-            </p>
-        {{/if}}
-    {{/rows}}
-    <p>has stand against this ...</p>
+<div class="container">
+    <div class="header signers">
+        <p>These incredible people has stand against the empty boxes in the fridges!</p>
+    </div>
+    <div class="main list-signers">
+        {{#rows}}
+            {{#if url}}
+                <p>
+                    <a href="{{url}}">
+                        {{first_name}} {{last_name}}
+                    </a> 
+                    {{#if age}}
+                        ({{age}}) 
+                    {{/if}}
+                    {{#if city}}
+                        from <a href="/signers/{{city}}">{{city}}</a>
+                    {{/if}}
+                </p>
+            {{else}}
+                <p>
+                    {{first_name}} {{last_name}} 
+                    {{#if age}}
+                        ({{age}}) 
+                    {{/if}}
+                    {{#if city}}
+                        from <a href="/signers/{{city}}">{{city}}</a>
+                    {{/if}}
+                </p>
+            {{/if}}
+        {{/rows}}
+    </div>
 </div>

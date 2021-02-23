@@ -81,6 +81,15 @@ app.get('/profile', (req, res) => {
     res.render('profile', { layout: 'main' });
 });
 
+// route "/edit"
+app.get('/edit', (req, res) => {
+    db.getUpdateInfo(req.session.userId)
+        .then(({ rows }) => {
+            res.render('edit', { layout: 'main', rows });
+        })
+        .catch((err) => console.log('err in getUpdateInfo :>> ', err));
+});
+
 //  route "/petition"
 app.get('/petition', (req, res) => {
     res.render('petition', { layout: 'main' });
@@ -119,10 +128,12 @@ app.get('/signers', (req, res) => {
 });
 
 // route "/signers_by_city"
-app.get('/signers_by_city/:city', (req, res) => {
+app.get('/signers/:city', (req, res) => {
     const city = req.params.city;
+    console.log('city :>> ', city);
     db.getLocalSigners(req.params.city).then(({ rows }) => {
-        res.render('signers_by_city', { layout: 'main', rows, city });
+        console.log('city :>> ', city);
+        res.render('signersbycity', { layout: 'main', rows, city });
     });
 });
 
@@ -187,6 +198,7 @@ app.post('/login', (req, res) => {
     }
     db.getLogInfo(email)
         .then(({ rows }) => {
+            // console.log('rows :>> ', rows);
             const { password_hash, id } = rows[0];
             return compare(password, password_hash)
                 .then((match) => {
@@ -217,20 +229,20 @@ app.post('/login', (req, res) => {
             res.render('login', {
                 layout: 'main',
                 error: true,
-                errorMsg: `Either you are trying to trick us with an unregistered email or the nasty database didn't gave us your information.  Either way please try again.`,
+                errorMsg: `Either you are trying to trick us with an unregistered email or the nasty database didn't give us your information.  Either way please try again.`,
             });
         });
 });
 
 // route "/profile"
 app.post('/profile', (req, res) => {
-    const { age, city, url } = req.body;
+    let { age, city, url } = req.body;
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
         url += 'https://';
     }
     // req.session.userId = id; // turned out i do not need it otherwise i recieve an error
     // should i define a user id cookie here? or do i have already one?
-    db.addProfile(req.session.userId, age, city, url)
+    db.addProfile(age, city, url, req.session.userId)
         .then(() => {
             res.redirect('/petition');
         })
@@ -242,6 +254,63 @@ app.post('/profile', (req, res) => {
                 errorMsg: `A problem occured while saving your data. Please try again.`,
             });
         });
+});
+
+// route "/edit"
+app.post('/edit', (req, res) => {
+    if (req.body.password) {
+        hash(password)
+            .then((password_hash) => {
+                const { firstname, lastname, email, password_hash } = req.body;
+                return db
+                    .editUserWithPass(
+                        firstname,
+                        lastname,
+                        email,
+                        password_hash,
+                        req.session.userId
+                    )
+                    .then(({ rows }) => {
+                        // req.session.userId = rows[0].id; // firs&lastname may come in handy!
+                        res.render('edit', {
+                            layout: 'main',
+                            rows,
+                            success: true,
+                            successMsg: `Your profile is successfully updated.`,
+                        });
+                    })
+                    .catch((err) => {
+                        console.log('err :>> ', err);
+                        res.render('edit', {
+                            layout: 'main',
+                            error: true,
+                            errorMsg: `Wait, something went wrong. Please try again!`,
+                        });
+                    });
+            })
+            .catch((err) => {
+                console.log('err :>> ', err);
+                res.render('register', {
+                    layout: 'main',
+                    error: true,
+                    errorMsg: `This may sound silly but I couldn't handle your password. Will you be a good person and give it again? Please...?`,
+                });
+            });
+    } else {
+        let { first_name, last_name, email } = req.body;
+        db.editUserNoPass(
+            first_name,
+            last_name,
+            email,
+            req.session.userId
+        ).then(() => {
+            res.render('edit', {
+                layout: 'main',
+                success: true,
+                successMsg: `Your profile is successfully updated.`,
+            });
+        });
+    }
 });
 
 //  route "/petition"

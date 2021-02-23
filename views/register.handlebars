@@ -1,21 +1,28 @@
-{{#if error}}
-<h4>{{errorMsg}}</h4>
-{{/if}}
-<form method="POST">
-    <div class="name inputs">
-        <input type="text" id="firstname" name="firstname" placeholder="Irresponsible"><br>
-        <input type="text" id="lastname" name="lastname" placeholder="Roommate"><br>
-        <input type="email" id="email" name="email" placeholder="iPutBackEmptyBoxes@inthefridge.com" required><br>
-        <input type="password" id="password" name="password" minlength="8" required><br>
-        <input type="password" id="rePassword" name="rePassword" required><br>
+<div class="container">
+    <div class="header register">
+        <h2>We need these information.</h2>
+        {{#if error}}
+        <h4 class="error">{{errorMsg}}</h4>
+        {{/if}}
     </div>
-    <div class="name labels">
-        <label for="firstname">First Name</label>
-        <label for="lastname">Last Name</label>
-        <label for="email">Email Address</label>
-        <label for="password">Password</label>
-        <label for="rePassword">Confirm your password</label>
-    </div>    
-    <button>SIGN UP</button>
-    <p>If you are already a member of this incredibly reactive community please <a href="/login">log in</a>.</p>
-</form>
+    <div class="main">
+        <div class="form-register">
+            <form method="POST">
+                <div class="inputs">
+                    <input type="text" id="firstname" name="firstname" placeholder="Irresponsible"><br>
+                    <label for="firstname">First Name</label>
+                    <input type="text" id="lastname" name="lastname" placeholder="Roommate"><br>
+                    <label for="lastname">Last Name</label>
+                    <input type="email" id="email" name="email" placeholder="iPutBackEmptyBoxes@inthefridge.com" required><br>
+                    <label for="email">Email Address</label>
+                    <input type="password" id="password" name="password" minlength="8" required><br>
+                    <label for="password">Password</label>
+                    <input type="password" id="rePassword" name="rePassword" required><br>
+                    <label for="rePassword">Confirm your password</label>
+                </div>
+                <button class="bt register">SIGN UP</button>
+            </form>
+        </div>
+        <p>If you are already a member of this incredibly reactive community please <a href="/login">log in</a>.</p>
+    </div>
+</div>

@@ -1,16 +1,23 @@
-{{#if error}}
-<h4>{{errorMsg}}</h4>
-{{/if}}
-<form method="POST">
-    <div class="additional-inputs">
-        <input type="text" id="age" name="age" placeholder="Your Age"><br>
-        <input type="text" id="city" name="city" placeholder="Your City"><br>
-        <input type="url" id="url" name="url" placeholder="Your Web Page"><br>
+<div class="container">
+    <div class="header-profile">
+        <h2>We want more information about you.</h2>
+        {{#if error}}
+        <h4 class="error">{{errorMsg}}</h4>
+        {{/if}}
     </div>
-    <div class="name labels">
-        <label for="age">Your Age</label>
-        <label for="city">City</label>
-        <label for="url">Personal Page</label>
-    </div>    
-    <button>SAVE</button>
-</form>
+    <div class="main">
+        <div class="form-profile">
+            <form method="POST">
+                <div class="inputs">
+                    <input type="text" id="age" name="age" placeholder="Your Age"><br>
+                    <label for="age">Your Age</label>
+                    <input type="text" id="city" name="city" placeholder="Your City"><br>
+                    <label for="city">City</label>
+                    <input type="url" id="url" name="url" placeholder="Your Web Page"><br>
+                    <label for="url">Personal Page</label>
+                </div>
+                <button class="bt profile">SAVE</button>
+            </form>
+        </div>
+    </div>
+</div>

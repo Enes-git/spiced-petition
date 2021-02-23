@@ -25,16 +25,49 @@ module.exports.addNewUser = (first_name, last_name, email, password_hash) => {
     return db.query(q, params);
 };
 
-module.exports.addProfile = (user_id, age, city, url) => {
+module.exports.addProfile = (age, city, url, user_id) => {
     const q = `
     INSERT INTO profiles (age, city, url, user_id)
     VALUES ($1, $2, $3, $4)
     RETURNING user_id`;
-    const params = [age, city, url, user_id];
+    const params = [age || null, city || null, url || null, user_id];
     return db.query(q, params);
 };
 
-// module.exports.editProfile=()
+module.exports.editUserNoPass = (first_name, last_name, email, id) => {
+    const q = `
+    UPDATE users
+    SET first_name = $1, last_name = $2, email = $3
+    WHERE id = $4`;
+    const params = [first_name, last_name, email, id];
+    return db.query(q, params);
+};
+
+module.exports.editUserWithPass = (
+    first_name,
+    last_name,
+    email,
+    password_hash,
+    id
+) => {
+    const q = `
+    UPDATE users
+    SET first_name = $1, last_name = $2, email = $3, password = $4
+    WHERE id = $5`;
+    const params = [first_name, last_name, email, password_hash, id];
+    return db.query(q, params);
+};
+
+module.exports.editProfile = (age, city, url, user_id) => {
+    const q = `
+    INSERT INTO profiles (age, city, url, user_id)
+    VALUES ($1, $2, $3, $4)
+    ON CONFLICT (user_id)
+    DO UPDATE SET age = $1, city = $2, url = $3
+    WHERE user_id = $4`;
+    const params = [age, city, url, user_id];
+    return db.query(q, params);
+};
 
 // ================= SELECTS ==========================
 // selecting a total number of signers
@@ -71,7 +104,7 @@ module.exports.getSignature = (id) => {
 module.exports.getLogInfo = (email) => {
     // should i add email here, since i have it as a param from user alredy
     const q = `
-    SELECT password_hash, id, signature
+    SELECT password_hash, users.id, signature
     FROM users 
     LEFT JOIN signatures
     ON users.id = signatures.user_id
@@ -94,9 +127,13 @@ module.exports.getLocalSigners = (city) => {
     return db.query(q, params);
 };
 
-// module.exports.getUpdateInfo = () => {
-//     const q =`
-//     SELECT profiles..user_id, first_name, last_name, email, age, city, url
-//     FROM users
-//     INNER JOIN `
-// }
+module.exports.getUpdateInfo = (id) => {
+    const q = `
+    SELECT profiles.user_id, first_name, last_name, email, age, city, url
+    FROM users
+    LEFT JOIN profiles
+    ON profiles.user_id = users.id
+    WHERE users.id = $1`;
+    const params = [id];
+    returndb.query(q, params);
+};
