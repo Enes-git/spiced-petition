@@ -135,5 +135,5 @@ module.exports.getUpdateInfo = (id) => {
     ON profiles.user_id = users.id
     WHERE users.id = $1`;
     const params = [id];
-    returndb.query(q, params);
+    return db.query(q, params);
 };

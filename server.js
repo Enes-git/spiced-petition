@@ -3,8 +3,13 @@ const db = require('./db');
 const hb = require('express-handlebars');
 const cookieSession = require('cookie-session');
 const express = require('express');
-
+const authRoutes = require('./auth_routes');
 const app = express();
+const {
+    requireLoggedIn,
+    requireSignature,
+    requireNoSignature,
+} = require('./middlewares');
 
 // ====== handlebars template engine =================
 app.engine('handlebars', hb());
@@ -25,57 +30,15 @@ app.use(express.urlencoded({ extended: false }));
 //  serving the static files
 app.use(express.static('./public'));
 
-//  user check with cookie ===== NOT WORKING ======
-// app.use((req, res, next) => {
-//     if (req.session.userId) {
-//         req.url != '/register' ? res.redirect('/login') : next();
-//     } else {
-//         res.redirect('/register');
-//     }
-// });
+// adding auth routes file
+app.use(authRoutes.router);
 
-// signature check with cookie ===== NOT WORKING ======
-// app.use((req, res, next) => {
-//     if (req.session.signatureId) {
-//         req.url != '/signers' ? res.redirect('/thanks') : next();
-//     } else {
-//         res.redirect('/petition');
-//     }
-// });
-// app.use((req, res, next) => {
-//     if (req.session.userId) {
-//         if (req.url != "register"){
-//             res.redirect("/login");
-//             next('route');
-//         } else{
-//             next('route');
-//         }
-//     else next()
-// }, (req,res, next)=>{
-//     if (req.session.signatureId){
-//         if (req.url == )
-//         res.redirect("/thanks")
-//     }
-// }
-// );
+// user check with cookies
+// userId check
+app.use(requireLoggedIn);
+
 // ==================== REQUESTS ========================
-
 // ==== GET REQUESTS =====
-// route "/"
-app.get('/', (req, res) => {
-    res.redirect('/register'); // can be changed to a landing page
-});
-
-// route "/register"
-app.get('/register', (req, res) => {
-    res.render('register', { layout: 'main' });
-});
-
-// route "/login"
-app.get('/login', (req, res) => {
-    res.render('login', { layout: 'main' });
-});
-
 //  route "/profile"
 app.get('/profile', (req, res) => {
     res.render('profile', { layout: 'main' });
@@ -91,12 +54,12 @@ app.get('/edit', (req, res) => {
 });
 
 //  route "/petition"
-app.get('/petition', (req, res) => {
+app.get('/petition', requireNoSignature, (req, res) => {
     res.render('petition', { layout: 'main' });
 });
 
 //  route "/thanks"
-app.get('/thanks', (req, res) => {
+app.get('/thanks', requireSignature, (req, res) => {
     db.getSignersCount()
         .then(({ rows }) => {
             let signerCount = rows[0].count;
@@ -116,7 +79,7 @@ app.get('/thanks', (req, res) => {
 });
 
 // route "/signers"
-app.get('/signers', (req, res) => {
+app.get('/signers', requireSignature, (req, res) => {
     //ERROR: cannot set headers / not rendering
     db.getAllSigners()
         .then(({ rows }) => {
@@ -140,100 +103,6 @@ app.get('/signers/:city', (req, res) => {
 // =============== END GET requests ===========================
 
 // =============== POST REQUESTS =========================
-// route "register"
-app.post('/register', (req, res) => {
-    const { firstname, lastname, email, password, rePassword } = req.body;
-    if (!firstname || !lastname || !email || !password || !rePassword) {
-        res.render('register', {
-            layout: 'main',
-            error: true,
-            errorMsg: `Please provide all the information. We really want to track you!`,
-        });
-    } else {
-        if (password === rePassword) {
-            hash(password)
-                .then((password_hash) => {
-                    return db
-                        .addNewUser(firstname, lastname, email, password_hash)
-                        .then(({ rows }) => {
-                            req.session.userId = rows[0].id; // firs&lastname may come in handy!
-                            res.redirect('/profile');
-                        })
-                        .catch((err) => {
-                            console.log('err :>> ', err);
-                            res.render('register', {
-                                layout: 'main',
-                                error: true,
-                                errorMsg: `Wait, I wasn't listening. Please type your information again!`,
-                            });
-                        });
-                })
-                .catch((err) => {
-                    console.log('err :>> ', err);
-                    res.render('register', {
-                        layout: 'main',
-                        error: true,
-                        errorMsg: `This may sound silly but I couldn't handle your password. Will you be a good person and give it again? Please...?`,
-                    });
-                });
-        } else {
-            res.render('register', {
-                layout: 'main',
-                error: true,
-                errorMsg: `Your password does NOT match. Please try again carefully. Just focus on your typing!`,
-            });
-        }
-    }
-});
-
-// route "login"
-app.post('/login', (req, res) => {
-    const { email, password } = req.body;
-    if (email == '' || password == '') {
-        res.render('login', {
-            layout: 'main',
-            error: true,
-            errorMsg: `Did you think I would buy that?! Please give me that email and password now!`,
-        });
-    }
-    db.getLogInfo(email)
-        .then(({ rows }) => {
-            // console.log('rows :>> ', rows);
-            const { password_hash, id } = rows[0];
-            return compare(password, password_hash)
-                .then((match) => {
-                    if (match) {
-                        req.session.userId = id;
-                        if (req.session.signatureId) {
-                            req.url == '/signers'
-                                ? res.redirect('/signers') // can use next() or continue here?
-                                : res.redirect('/thanks');
-                        } else {
-                            res.redirect('/petition');
-                        }
-                    } else {
-                        res.render('login', {
-                            layout: 'main',
-                            error: true,
-                            errorMsg: `Your password is wrong, please try again with paying attention to your fingers!`,
-                        });
-                    }
-                })
-                .catch((err) => {
-                    console.log('err :>> ', err);
-                    return db.getLogInfo(email);
-                });
-        })
-        .catch((err) => {
-            console.log('err :>> ', err);
-            res.render('login', {
-                layout: 'main',
-                error: true,
-                errorMsg: `Either you are trying to trick us with an unregistered email or the nasty database didn't give us your information.  Either way please try again.`,
-            });
-        });
-});
-
 // route "/profile"
 app.post('/profile', (req, res) => {
     let { age, city, url } = req.body;
@@ -258,59 +127,129 @@ app.post('/profile', (req, res) => {
 
 // route "/edit"
 app.post('/edit', (req, res) => {
-    if (req.body.password) {
-        hash(password)
-            .then((password_hash) => {
-                const { firstname, lastname, email, password_hash } = req.body;
-                return db
-                    .editUserWithPass(
-                        firstname,
-                        lastname,
-                        email,
-                        password_hash,
-                        req.session.userId
-                    )
-                    .then(({ rows }) => {
-                        // req.session.userId = rows[0].id; // firs&lastname may come in handy!
-                        res.render('edit', {
-                            layout: 'main',
-                            rows,
-                            success: true,
-                            successMsg: `Your profile is successfully updated.`,
-                        });
+    // second try
+    const { firstname, lastname, email, password, age, city, url } = req.body;
+    db.editProfile(age, city, url, req.session.userId)
+        .then(() => {
+            if (password) {
+                hash(password)
+                    .then((password_hash) => {
+                        db.editUserWithPass(
+                            firstname,
+                            lastname,
+                            email,
+                            password_hash,
+                            req.session.userId
+                        )
+                            .then(({ rows }) => {
+                                res.render('edit', {
+                                    layout: 'main',
+                                    rows,
+                                    success: true,
+                                    successMsg: `Your profile is successfully updated.`,
+                                });
+                            })
+                            .catch((err) => {
+                                console.log(
+                                    'err wditUserWithPassword:>> ',
+                                    err
+                                );
+                            });
                     })
                     .catch((err) => {
-                        console.log('err :>> ', err);
-                        res.render('edit', {
-                            layout: 'main',
-                            error: true,
-                            errorMsg: `Wait, something went wrong. Please try again!`,
-                        });
+                        console.log('err in hash_pass:>> ', err);
                     });
-            })
-            .catch((err) => {
-                console.log('err :>> ', err);
-                res.render('register', {
-                    layout: 'main',
-                    error: true,
-                    errorMsg: `This may sound silly but I couldn't handle your password. Will you be a good person and give it again? Please...?`,
+            } else {
+                db.editUserNoPass(
+                    firstname,
+                    lastname,
+                    email,
+                    req.session.userId
+                ).then(({ rows }) => {
+                    res.render('edit', {
+                        layout: 'main',
+                        rows,
+                        success: true,
+                        successMsg: `Your profile is successfully updated.`,
+                    });
                 });
-            });
-    } else {
-        let { first_name, last_name, email } = req.body;
-        db.editUserNoPass(
-            first_name,
-            last_name,
-            email,
-            req.session.userId
-        ).then(() => {
-            res.render('edit', {
-                layout: 'main',
-                success: true,
-                successMsg: `Your profile is successfully updated.`,
-            });
+            }
+        })
+        .catch((err) => {
+            console.log('req.session.userId :>> ', req.session.userId);
+            console.log('err in editProfile:>> ', err);
         });
-    }
+
+    // first version
+    // const { firstname, lastname, email, password, age, city, url } = req.body;
+    // if (password) {
+    //     hash(password)
+    //         .then((password_hash) => {
+    //             return db
+    //                 .editUserWithPass(
+    //                     firstname,
+    //                     lastname,
+    //                     email,
+    //                     password_hash,
+    //                     req.session.userId
+    //                 )
+    //                 .then(() => {
+    //                     db.editProfile(age, city, url, req.session.userId)
+    //                         .then(({ rows }) => {
+    //                             res.render('edit', {
+    //                                 layout: 'main',
+    //                                 rows,
+    //                                 success: true,
+    //                                 successMsg: `Your profile is successfully updated.`,
+    //                             });
+    //                         })
+    //                         .catch((err) => {
+    //                             console.log(
+    //                                 'err in re-rendering after pass & change:>> ',
+    //                                 err
+    //                             );
+    //                         });
+    //                 })
+    //                 .catch((err) => {
+    //                     console.log('err in editProfile after pass :>> ', err);
+    //                     res.render('edit', {
+    //                         layout: 'main',
+    //                         error: true,
+    //                         errorMsg: `Wait, something went wrong. Please try again!`,
+    //                     });
+    //                 });
+    //         })
+    //         .catch((err) => {
+    //             console.log('err in password_hash:>> ', err);
+    //             res.render('register', {
+    //                 layout: 'main',
+    //                 error: true,
+    //                 errorMsg: `This may sound silly but I couldn't handle your password. Will you be a good person and give it again? Please...?`,
+    //             });
+    //         });
+    // } else {
+    //     db.editUserNoPass(firstname, lastname, email, req.session.userId)
+    //         .then(() => {
+    //             db.editProfile(age, city, url, req.session.userId)
+    //                 .then(({ rows }) => {
+    //                     res.render('edit', {
+    //                         layout: 'main',
+    //                         rows,
+    //                         success: true,
+    //                         successMsg: `Your profile is successfully updated.`,
+    //                     });
+    //                 })
+    //                 .catch((err) => {
+    //                     console.log(
+    //                         'err in editProfile after NoPass :>> ',
+    //                         err
+    //                     );
+    //                 });
+    //         })
+    //         .catch((err) => {
+    //             console.log('err in editNoPass :>> ', err);
+    //         });
+    // } // tried Promise.all here but couldn't make it work??
 });
 
 //  route "/petition"
