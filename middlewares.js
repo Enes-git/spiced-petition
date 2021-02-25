@@ -11,7 +11,7 @@ exports.requireLoggedIn = (req, res, next) => {
 // logged in users can't log in again
 exports.requireLoggedOut = (req, res, next) => {
     if (req.session.userId) {
-        return res.redirect('/profile');
+        return res.redirect('/petition');
     }
     next();
 };

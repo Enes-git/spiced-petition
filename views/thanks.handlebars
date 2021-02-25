@@ -1,13 +1,27 @@
 <div class="container">
+    <div class="coatation-img">
+        <img src="https://media1.tenor.com/images/b6238d12f5dd97665538db436dfb9653/tenor.gif?itemid=16725450" alt="Thanks and Bye!">
+    </div>
     <div class="header thanks">
+        <h2>Thank you for helping to prevent the poor fridges from empty boxes.</h2>
+        <h3>Congratulations! You made room for your polar bear!</h3>
         <img src="{{canvasUrlVal}}" alt="Your Signature">
+        {{#if error}}
+        <h4 class="error">{{errorMsg}}</h4>
+        {{/if}}
+        <div class="main delete">
+            <form method="POST">
+                <button class="bt delete" name="button">DELETE SIGNATURE</button>
+                <input type="hidden" name="_csrf" value="{{csrfToken}}">
+            </form>
+        </div>
     </div>
     <div class="main thanks">
-        <h3>Thank you for helping to prevent the poor fridges from empty boxes.</h3>
         <h4>Now they will be moved to garbage cans, where they belong!</h4>
-        <p>So far {{signerCount}} people have gathered around this cause.<br>Help us grow this awareness.</p>   
+        <p>So far {{signerCount}} people have gathered around this cause.</p>
+        <p>Help us grow this awareness.</p>   
 
-        <p>You can see other signers </p><a href="/signers">here</a>.</a>
+        <p>You can see other signers <a href="/signers"><strong>here</strong></a>.</a></p>
 
     </div>
 </div>

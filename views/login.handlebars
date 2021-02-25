@@ -1,5 +1,6 @@
 <div class="container">
     <div class="header login">
+        <h3>Sign our petition to make all governments put a ban on putting the <span>empty</span> bottles back in the fridges!</h3>
         <h2>Let us get you in.</h2>
         {{#if error}}
         <h4 class="error">{{errorMsg}}</h4>
@@ -9,14 +10,22 @@
         <div class="form login">
             <form method="POST">
                 <div class="inputs">
-                    <input type="email" id="email" name="email" required>
-                    <label for="email">Email Address</label>
-                    <input type="password" id="password" name="password" required>
-                    <label for="password">Password</label>
+                    <div class="email">
+                        <input type="email" id="email" name="email" required>
+                        <label for="email">Email Address</label>
+                    </div>
+                    <div class="password">
+                        <input type="password" id="password" name="password" required>
+                        <label for="password">Password</label>
+                    </div>
+                    <input type="hidden" name="_csrf" value="{{csrfToken}}">
                 </div>
-                <button class="bt login">LOG IN</button>
+                <button class="bt-login">LOG IN</button>
             </form> 
         </div>
-        <p>If you are not a member of this incredibly reactive community please <a href="/register">register here</a>.</p>
+        <div class="image">
+            <img src="http://www.denfoil.com/images/no-drinking-prohibition-signs-102.112-p.png" alt="No Bottles">
+        </div>
     </div>
+    <p>If you are not a member of this incredibly reactive community please <a href="/register">register here</a>.</p>
 </div>

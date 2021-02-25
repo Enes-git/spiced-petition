@@ -52,9 +52,10 @@ module.exports.editUserWithPass = (
 ) => {
     const q = `
     UPDATE users
-    SET first_name = $1, last_name = $2, email = $3, password = $4
+    SET first_name = $1, last_name = $2, email = $3, password_hash = $4
     WHERE id = $5`;
     const params = [first_name, last_name, email, password_hash, id];
+    // console.log('params :>> ', params);
     return db.query(q, params);
 };
 
@@ -63,11 +64,24 @@ module.exports.editProfile = (age, city, url, user_id) => {
     INSERT INTO profiles (age, city, url, user_id)
     VALUES ($1, $2, $3, $4)
     ON CONFLICT (user_id)
-    DO UPDATE SET age = $1, city = $2, url = $3
-    WHERE user_id = $4`;
-    const params = [age, city, url, user_id];
+    DO UPDATE SET age = $1, city = $2, url = $3`;
+    const params = [age || null, city, url, user_id];
+    // console.log('params :>> ', params);
     return db.query(q, params);
 };
+
+// ================= DELETES ==========================
+// deleting signature
+module.exports.deleteSignature = (id) => {
+    const q = `
+    DELETE FROM signatures
+    WHERE user_id = $1`;
+    const params = [id];
+    return db.query(q, params);
+};
+
+// deleting account
+// on construction... :)
 
 // ================= SELECTS ==========================
 // selecting a total number of signers
@@ -104,7 +118,7 @@ module.exports.getSignature = (id) => {
 module.exports.getLogInfo = (email) => {
     // should i add email here, since i have it as a param from user alredy
     const q = `
-    SELECT password_hash, users.id, signature
+    SELECT password_hash, users.id, signature, signatures.id AS signature_id
     FROM users 
     LEFT JOIN signatures
     ON users.id = signatures.user_id

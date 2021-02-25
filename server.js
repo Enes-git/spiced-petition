@@ -4,6 +4,7 @@ const hb = require('express-handlebars');
 const cookieSession = require('cookie-session');
 const express = require('express');
 const authRoutes = require('./auth_routes');
+const csurf = require('csurf');
 const app = express();
 const {
     requireLoggedIn,
@@ -26,6 +27,14 @@ app.use(
 
 // middleware for post requests
 app.use(express.urlencoded({ extended: false }));
+
+// csurf
+app.use(csurf());
+
+app.use(function (req, res, next) {
+    res.locals.csrfToken = req.csrfToken();
+    next();
+});
 
 //  serving the static files
 app.use(express.static('./public'));
@@ -50,7 +59,7 @@ app.get('/edit', (req, res) => {
         .then(({ rows }) => {
             res.render('edit', { layout: 'main', rows });
         })
-        .catch((err) => console.log('err in getUpdateInfo :>> ', err));
+        .catch((err) => console.log('err in get/edit getUpdateInfo :>> ', err));
 });
 
 //  route "/petition"
@@ -73,21 +82,26 @@ app.get('/thanks', requireSignature, (req, res) => {
                         canvasUrlVal,
                     });
                 })
-                .catch((err) => console.log('err :>> ', err));
+                .catch((err) =>
+                    console.log('err in get/thanks getSignature :>> ', err)
+                );
         })
-        .catch((err) => console.log('err :>> ', err));
+        .catch((err) =>
+            console.log('err in get/thanks getSignatureCount :>> ', err)
+        );
 });
 
 // route "/signers"
 app.get('/signers', requireSignature, (req, res) => {
-    //ERROR: cannot set headers / not rendering
     db.getAllSigners()
         .then(({ rows }) => {
             // console.log('rows :>> ', rows);
             // const { first_name, last_name, age, city, url } = rows;
             res.render('signers', { layout: 'main', rows });
         })
-        .catch((err) => console.log('err :>> ', err));
+        .catch((err) =>
+            console.log('err in get/signers getAllSigners :>> ', err)
+        );
 });
 
 // route "/signers_by_city"
@@ -116,7 +130,7 @@ app.post('/profile', (req, res) => {
             res.redirect('/petition');
         })
         .catch((err) => {
-            console.log('err :>> ', err);
+            console.log('err in post/profile addProfile :>> ', err);
             res.render('profile', {
                 layout: 'main',
                 error: true,
@@ -151,13 +165,13 @@ app.post('/edit', (req, res) => {
                             })
                             .catch((err) => {
                                 console.log(
-                                    'err wditUserWithPassword:>> ',
+                                    'err in post/edit editUserWithPassword :>> ',
                                     err
                                 );
                             });
                     })
                     .catch((err) => {
-                        console.log('err in hash_pass:>> ', err);
+                        console.log('err in post/edit hash :>> ', err);
                     });
             } else {
                 db.editUserNoPass(
@@ -165,91 +179,27 @@ app.post('/edit', (req, res) => {
                     lastname,
                     email,
                     req.session.userId
-                ).then(({ rows }) => {
-                    res.render('edit', {
-                        layout: 'main',
-                        rows,
-                        success: true,
-                        successMsg: `Your profile is successfully updated.`,
+                )
+                    .then(({ rows }) => {
+                        res.render('edit', {
+                            layout: 'main',
+                            rows,
+                            success: true,
+                            successMsg: `Your profile is successfully updated.`,
+                        });
+                    })
+                    .catch((err) => {
+                        console.log(
+                            'err in post/edit editUserNoPass :>> ',
+                            err
+                        );
                     });
-                });
             }
         })
         .catch((err) => {
             console.log('req.session.userId :>> ', req.session.userId);
-            console.log('err in editProfile:>> ', err);
+            console.log('err in post/edit editProfile :>> ', err);
         });
-
-    // first version
-    // const { firstname, lastname, email, password, age, city, url } = req.body;
-    // if (password) {
-    //     hash(password)
-    //         .then((password_hash) => {
-    //             return db
-    //                 .editUserWithPass(
-    //                     firstname,
-    //                     lastname,
-    //                     email,
-    //                     password_hash,
-    //                     req.session.userId
-    //                 )
-    //                 .then(() => {
-    //                     db.editProfile(age, city, url, req.session.userId)
-    //                         .then(({ rows }) => {
-    //                             res.render('edit', {
-    //                                 layout: 'main',
-    //                                 rows,
-    //                                 success: true,
-    //                                 successMsg: `Your profile is successfully updated.`,
-    //                             });
-    //                         })
-    //                         .catch((err) => {
-    //                             console.log(
-    //                                 'err in re-rendering after pass & change:>> ',
-    //                                 err
-    //                             );
-    //                         });
-    //                 })
-    //                 .catch((err) => {
-    //                     console.log('err in editProfile after pass :>> ', err);
-    //                     res.render('edit', {
-    //                         layout: 'main',
-    //                         error: true,
-    //                         errorMsg: `Wait, something went wrong. Please try again!`,
-    //                     });
-    //                 });
-    //         })
-    //         .catch((err) => {
-    //             console.log('err in password_hash:>> ', err);
-    //             res.render('register', {
-    //                 layout: 'main',
-    //                 error: true,
-    //                 errorMsg: `This may sound silly but I couldn't handle your password. Will you be a good person and give it again? Please...?`,
-    //             });
-    //         });
-    // } else {
-    //     db.editUserNoPass(firstname, lastname, email, req.session.userId)
-    //         .then(() => {
-    //             db.editProfile(age, city, url, req.session.userId)
-    //                 .then(({ rows }) => {
-    //                     res.render('edit', {
-    //                         layout: 'main',
-    //                         rows,
-    //                         success: true,
-    //                         successMsg: `Your profile is successfully updated.`,
-    //                     });
-    //                 })
-    //                 .catch((err) => {
-    //                     console.log(
-    //                         'err in editProfile after NoPass :>> ',
-    //                         err
-    //                     );
-    //                 });
-    //         })
-    //         .catch((err) => {
-    //             console.log('err in editNoPass :>> ', err);
-    //         });
-    // } // tried Promise.all here but couldn't make it work??
 });
 
 //  route "/petition"
@@ -265,12 +215,29 @@ app.post('/petition', (req, res) => {
             res.redirect('/thanks');
         })
         .catch((err) => {
-            console.log('err >> ', err);
+            console.log('err in post/petition addSignature :>> ', err);
             res.render('petition', {
                 layout: 'main',
                 error: true,
                 errorMsg: `Error in saving your data, try again!`,
             }); // can be both in templates and here / should  it in the handlebars / can be put into partials
+        });
+});
+
+// route "/thanks" (deleting)
+app.post('/thanks', (req, res) => {
+    db.deleteSignature(req.session.userId)
+        .then(() => {
+            req.session.signatureId = null;
+            res.redirect('/petition');
+        })
+        .catch((err) => {
+            console.log('err in deleteSignature :>> ', err);
+            res.render('thanks', {
+                layout: 'main',
+                error: true,
+                errorMsg: `An error occured. Please try again.`,
+            });
         });
 });
 // ============= END  POST requests ==========================

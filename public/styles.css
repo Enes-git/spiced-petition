@@ -1,37 +1,107 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
 .container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 95vh;
+    max-width: 900px;
     justify-content: center;
-    background-color: dodgerblue;
 }
 .header {
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 2em;
+    height: auto;
+    text-align: center;
+    width: auto;
+    text-indent: 15px;
 }
-.additional-inputs {
+.main {
+    display: flex;
+}
+.thanks {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+form {
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    width: 200px;
+    color: darkslategrey;
+    margin: 10px 10px;
+    border-width: 2px;
+    border-color: darkslategrey;
+}
+
+.inputs {
+    font-size: 15px;
+    height: auto;
+    width: auto;
+    color: darkslategrey;
+    margin: 10px 10px;
+    border-width: 2px;
+    border-color: darkslategrey;
+}
+
+.inputs > * {
+    margin-bottom: 3vh;
+}
+label {
     display: flex;
     justify-content: center;
+    margin-top: 1vh;
 }
-.name > * {
-    margin: 2vw;
+
+a {
+    text-decoration: none;
+    color: black;
 }
-.labels {
-    font-weight: bolder;
-    font-size: larger;
-    font-style: italic;
-    display: flex;
-    justify-content: center;
+.image > img {
+    width: 200px;
+    height: 200px;
+    margin-left: 70px;
+    padding-bottom: 20px;
 }
 canvas {
     border: solid 1px black;
+}
+
+.buttons {
+    display: inline-block;
+    margin: 20px;
+    width: 600px;
+    padding: 10px;
 }
 .canvas-submit {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
-.bt {
-    width: 100px;
+.bt-login {
+    width: 180px;
+    position: relative;
+    left: 10px;
+}
+#why-empty > img {
+    height: 280px;
+}
+
+.signers {
+    font-weight: bold;
+    font-style: italic;
+}
+.list-signers {
+    flex-direction: column;
+    list-style-type: circle;
+}
+.city-signers-img > img {
+    height: 350px;
 }

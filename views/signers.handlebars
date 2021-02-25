@@ -1,32 +1,38 @@
 <div class="container">
-    <div class="header signers">
-        <p>These incredible people has stand against the empty boxes in the fridges!</p>
+    <div class="signers-img">
+        <img src="https://pics.onsizzle.com/keep-an-empty-bottle-of-milk-in-your-fridge-in-12405698.png" alt="A Wise Saying">
+    </div>
+    <div class="header all-signers">
+        <h2>Despite Richard Hawkins,</h2>
+        <h3>These incredible people has stand against the empty boxes in the fridges!</h3>
     </div>
     <div class="main list-signers">
         {{#rows}}
-            {{#if url}}
-                <p>
-                    <a href="{{url}}">
-                        {{first_name}} {{last_name}}
-                    </a> 
-                    {{#if age}}
-                        ({{age}}) 
-                    {{/if}}
-                    {{#if city}}
-                        from <a href="/signers/{{city}}">{{city}}</a>
-                    {{/if}}
-                </p>
-            {{else}}
-                <p>
-                    {{first_name}} {{last_name}} 
-                    {{#if age}}
-                        ({{age}}) 
-                    {{/if}}
-                    {{#if city}}
-                        from <a href="/signers/{{city}}">{{city}}</a>
-                    {{/if}}
-                </p>
-            {{/if}}
+            <ul>
+                {{#if url}}
+                    <li>
+                        <a class="signers" href="{{url}}">
+                            {{first_name}} {{last_name}}
+                        </a> 
+                        {{#if age}}
+                            ({{age}}) 
+                        {{/if}}
+                        {{#if city}}
+                            from <a class="signers" href="/signers/{{city}}">{{city}}</a>
+                        {{/if}}
+                    </li>
+                {{else}}
+                    <li>
+                        {{first_name}} {{last_name}} 
+                        {{#if age}}
+                            ({{age}}) 
+                        {{/if}}
+                        {{#if city}}
+                            from <a class="signers" href="/signers/{{city}}">{{city}}</a>
+                        {{/if}}
+                    </li>
+                {{/if}}
+            </ul>
         {{/rows}}
     </div>
 </div>

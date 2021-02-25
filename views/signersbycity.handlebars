@@ -1,25 +1,31 @@
-<div class="main-container">
-    <p>These proud citizens from {{city}}</p>
+<div class="container">
+    <div class="city-signers-img">
+        <img src="https://i.dailymail.co.uk/i/pix/2017/05/15/17/4059728F00000578-4506502-image-a-19_1494864660542.jpg" alt="A Deadly Note">
+    </div>
+    <div class="header city-signers">
+        <h2>These proud citizens from {{city}}</h2>
+    </div>
     {{#rows}}
+    <ul>
         {{#if url}}
-            <p>
+            <li>
                 <a href="{{url}}">
                     {{first_name}} {{last_name}}
                 </a> 
                 {{#if age}}
                     ({{age}}) 
                 {{/if}}
-            </p>
+            </li>
         {{else}}
-            <p>
+            <li>
                 {{first_name}} {{last_name}} 
                 {{#if age}}
                     ({{age}}) 
                 {{/if}}
-            </p>
+            </li>
         {{/if}}
+    </ul>
     {{/rows}}
-    <p>has stand against this ...</p>
+    <h4>has stand against the empty boxes!</h4>
+    <p>Back to <a href="/signers">all <strong>signers.</strong></a></p>
 </div>
-
-<p>Back to <a href="/signers">all signers.</a>.</p>

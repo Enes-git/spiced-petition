@@ -10,7 +10,7 @@ const { requireLoggedOut } = require('./middlewares');
 // ===== GET ======
 // route "/"
 router.get('/', requireLoggedOut, (req, res) => {
-    res.redirect('/register'); // can be changed to a landing page
+    res.redirect('/login'); // can be changed to a landing page
 });
 
 // route "/register"
@@ -88,11 +88,12 @@ router.post('/login', (req, res) => {
             return compare(password, password_hash)
                 .then((match) => {
                     if (match) {
+                        // setting a user id
                         req.session.userId = id;
-                        if (req.session.signatureId) {
-                            req.url == '/signers'
-                                ? res.redirect('/signers') // can use next() or continue here?
-                                : res.redirect('/thanks');
+                        // sig check
+                        if (rows[0].signature != null) {
+                            req.session.signatureId = rows[0].signature_id;
+                            res.redirect('/thanks');
                         } else {
                             res.redirect('/petition');
                         }

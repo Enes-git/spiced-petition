@@ -1,24 +1,30 @@
 <div class="container">
     <div class="header petition">
         <h1>Take Action Now!</h1>
-        <h3>This may sound unbelievable but some people putting the <span >empty</span> container back in the fridge after finishing a food item. This is unacceptable! We must raise our woice to stop this madness. Let's take action! Let's join our forces today!</h3>
+        <h3>This may sound unbelievable but some people putting the <span >empty</span> container back in the fridge after finishing a food item. This is unacceptable! We must raise our voice to stop this madness. Let's take action! Let's join our forces today!</h3>
         <h2>Sign our petition to make all governments to put a ban on this outrageous action!</h2>
         {{#if error}}
         <h4 class="error">{{errorMsg}}</h4>
         {{/if}}
     </div>
     <div class="main">
-        <div class="form-petition">
+        <div class="form petition">
             <form method="POST">
                 <div class="canvas-submit">
                     <input id="canvas-url" type="hidden" name="signature">
                     <canvas id="canvas" width="400" height="100"></canvas>
                 </div>
-                <button class="bt sign">SIGN</button>
+                <div class="buttons">
+                    <button class="bt sign">SIGN</button>
+                    <button class="bt profile-skip"><a href="/edit">MY PROFILE</a></button>
+                </div>
+                <input type="hidden" name="_csrf" value="{{csrfToken}}">
             </form>
-            </div>
         </div>
-        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-        <script src="script.js"></script>
     </div>
+    <div id="why-empty">
+        <img src="http://c1.thejournal.ie/media/2013/05/empty-milk-375x500.png" alt="Leave A Message">
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="script.js"></script>
 </div>
